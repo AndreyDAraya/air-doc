@@ -1,0 +1,51 @@
+---
+title: Air Framework 🚀
+description: Build industrial-grade, modular, and reactive Flutter applications with ease.
+template: splash
+hero:
+  tagline: A modular, reactive, and scalable framework for Flutter.
+  image:
+    file: ../../assets/logo.jpg
+  actions:
+    - text: Getting Started
+      link: /getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/AndreyDAraya/air-framework
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## Why Air Framework?
+
+As apps grow, they become harder to maintain. Air Framework solves this by enforcing **strict module boundaries**, **unidirectional data flow**, and **explicit dependencies**. It's not just a state management library; it's a complete architecture for teams building large-scale Flutter applications.
+
+<CardGrid>
+  <Card title="Modular Architecture" icon="puzzle">
+    Self-contained, independent modules with clear boundaries and explicit
+    dependency management.
+  </Card>
+  <Card title="Reactive State" icon="bolt">
+    Powered by `air_state` with code generation for zero-boilerplate,
+    high-performance reactivity.
+  </Card>
+  <Card title="Dependency Injection" icon="add-document">
+    Type-safe DI with scoped services, module ownership, and lifecycle
+    management.
+  </Card>
+  <Card title="Secure by Design" icon="setting">
+    Opt-in permission system, secure service registry, and audit trails for
+    enterprise needs.
+  </Card>
+</CardGrid>
+
+## Core Packages
+
+| Package           | Description                                                   |
+| ----------------- | ------------------------------------------------------------- |
+| **air_framework** | The core orchestrator for modules, DI, routing, and security. |
+| **air_state**     | Lightweight reactive state management core.                   |
+| **air_generator** | Build runner code generation for reactive states.             |
+| **air_cli**       | Official command-line tool for scaffolding and automation.    |

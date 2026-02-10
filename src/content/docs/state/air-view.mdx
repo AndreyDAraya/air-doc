@@ -1,0 +1,39 @@
+---
+title: AirView
+description: Automatic, fine-grained reactivity for your Flutter UI.
+---
+
+`AirView` is the most powerful and efficient way to build reactive UIs in Air Framework. It allows your widgets to respond to state changes with surgical precision.
+
+## Automatic Tracking
+
+The magic of `AirView` lies in its ability to **automatically track dependencies**. When you access a `Flow` value inside the builder, `AirView` takes note.
+
+```dart
+AirView((context) {
+  // AirView now knows this widget depends on 'count'
+  return Text('Count: ${CounterFlows.count.value}');
+});
+```
+
+## Smart Rebuilding
+
+`AirView` is designed for performance. It follows a simple but strict rule:
+
+> **It only rebuilds if one of the states it accessed during the last build changes.**
+
+If other variables in the same `AirController` change, but this specific `AirView` didn't use them, **no rebuild occurs**. This ensures that your UI stays fast even as your state grows complex.
+
+## Comparison
+
+| Feature           | AirBuilder              | AirView                     |
+| ----------------- | ----------------------- | --------------------------- |
+| **Tracking**      | Manual (via `stateKey`) | Automatic (via access)      |
+| **Granularity**   | Single key              | Multiple keys / logic-based |
+| **Logic Support** | Best for simple values  | Best for complex UI logic   |
+
+## Best Practices
+
+1. **Keep it Small**: Use small, focused `AirView` wrappers around specific parts of your UI to minimize rebuild areas.
+2. **Access .value inside**: Always access the `.value` of a `Flow` or `StateKey` inside the builder function to ensure tracking.
+3. **Logic inside is fine**: You can perform calculations or conditional logic inside `AirView`, and it will track every state used in any branch of that logic.

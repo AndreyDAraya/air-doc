@@ -1,0 +1,115 @@
+---
+title: Quick Start
+description: Build your first Air Framework app in minutes.
+---
+
+This guide will walk you through creating a simple counter application using Air Framework.
+
+## 1. Create a New Project
+
+Use the Air CLI to scaffold a new project structure:
+
+```bash
+air create my_app --template=blank
+cd my_app
+```
+
+## 2. Define a Module
+
+Create a module by extending `AppModule`. A module encapsulates your routes and dependencies.
+
+```dart
+// lib/modules/counter/counter_module.dart
+import 'package:air_framework/air_framework.dart';
+
+class CounterModule extends AppModule {
+  @override
+  String get id => 'counter';
+
+  @override
+  List<AirRoute> get routes => [
+    AirRoute(
+      path: '/counter',
+      builder: (context, state) => const CounterPage(),
+    ),
+  ];
+
+  @override
+  void onBind(AirDI di) {
+    di.registerLazySingleton<CounterState>(() => CounterState());
+  }
+}
+```
+
+## 3. Define Reactive State
+
+Use the `@GenerateState` annotation. The framework will generate the reactive plumbing for you.
+
+```dart
+// lib/modules/counter/ui/state/state.dart
+import 'package:air_framework/air_framework.dart';
+
+part 'state.air.g.dart';
+
+@GenerateState('counter')
+class CounterState extends _CounterState {
+  // Private fields become reactive StateFlows
+  int _count = 0;
+
+  // Public methods become dispatchable Pulses
+  @override
+  void increment() {
+    count++; // Direct field access is tracked!
+  }
+}
+```
+
+## 4. Run Code Generation
+
+Run build_runner to generate the `state.air.g.dart` file:
+
+```bash
+air generate state
+```
+
+## 5. Build Reactive UI
+
+Use `AirView` to listen to state changes efficiently.
+
+```dart
+class CounterPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Air Counter')),
+      body: Center(
+        child: AirView((context) {
+          // Rebuilds ONLY when 'count' changes
+          return Text('Count: ${CounterFlows.count.value}');
+        }),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => CounterPulses.increment.pulse(null),
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+```
+
+## 6. Initialize the App
+
+Register your module in `main.dart`.
+
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  configureAirState();
+
+  await ModuleManager().register(CounterModule());
+
+  runApp(MaterialApp.router(
+    routerConfig: AirRouter().router,
+  ));
+}
+```

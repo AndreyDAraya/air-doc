@@ -1,0 +1,128 @@
+---
+title: Dependency Injection
+description: Managing services and types with AirDI.
+---
+
+Air Framework provides `AirDI`, a lightweight and powerful service locator for managing your application's dependencies.
+
+## Basic Usage
+
+### Registration
+
+You usually register services during the `onBind` phase of your module.
+
+```dart
+@override
+void onBind(AirDI di) {
+  // 1. Singleton - created immediately
+  di.register<AuthService>(AuthServiceImpl());
+
+  // 2. Lazy Singleton - created on first access (Recommended)
+  di.registerLazySingleton<ApiClient>(() => ApiClient());
+
+  // 3. Factory - new instance every time
+  di.registerFactory<Logger>(() => Logger());
+}
+```
+
+### Retrieval
+
+Retrieve services anywhere in your code using `AirDI().get<T>()`.
+
+```dart
+final authService = AirDI().get<AuthService>();
+
+// Safe retrieval (returns null if not found)
+final analytics = AirDI().tryGet<AnalyticsService>();
+```
+
+## Async Initialization Pattern
+
+Since `AirDI` registration in `onBind` is **synchronous**, some services (like `SharedPreferences` or database drivers) that require `await` cannot be fully initialized during registration.
+
+The recommended pattern is to record the dependency in `onBind` and perform the actual initialization in the module's `onInit` method.
+
+### Example: SharedPreferences
+
+```dart
+class StorageModule extends AppModule {
+  @override
+  void onBind(AirDI di) {
+    // 1. Register lazily. The instance isn't created yet.
+    di.registerLazySingleton<StorageService>(() => StorageServiceImpl());
+  }
+
+  @override
+  Future<void> onInit(AirDI di) async {
+    // 2. Perform the async work here.
+    // By getting the service, it is instantiated and we can await its init.
+    final storage = di.get<StorageService>();
+    await storage.init();
+
+    print("Storage initialized successfully");
+  }
+}
+```
+
+This ensures that the module is only considered "Ready" once `onInit` completes, preventing other modules from using a non-initialized service.
+
+## Module Ownership
+
+To support modular unregistration and security, you can specify which module owns a dependency.
+
+```dart
+di.register<PaymentService>(
+  PaymentServiceImpl(),
+  moduleId: 'payments', // Ownership
+);
+```
+
+When a module is unregistered, the framework can automatically clean up all dependencies owned by it:
+
+```dart
+di.unregisterModule('payments');
+```
+
+## Automatic Injection (@Inject)
+
+For a cleaner code style, Air Framework supports automatic dependency injection via annotations when using the code generator.
+
+### Usage
+
+Instead of manually calling `AirDI().get<T>()`, you can annotate your fields with `@Inject()`.
+
+```dart
+class MyService {
+  @Inject()
+  late AuthService authService;
+
+  @Inject('custom_api_key')
+  late ApiClient api;
+
+  void performAction() {
+    // authService is already injected and ready to use
+    authService.login(...);
+  }
+}
+```
+
+### How it works
+
+The `air_generator` processes these annotations and generates the code necessary to resolve these dependencies from `AirDI` during the object's initialization.
+
+---
+
+## Security & Overwriting
+
+By default, trying to register the same type twice will throw an error to prevent accidental overwrites. In testing scenarios, you can explicitly allow overwrites:
+
+```dart
+AirDI().register<AuthService>(MockAuth(), allowOverwrite: true);
+```
+
+## Debugging
+
+You can inspect the state of the DI container at any time:
+
+- `AirDI().debugRegisteredTypes`: List of all registered types.
+- `AirDI().debugRegistrationInfo`: Map of types and their owners.

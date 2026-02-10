@@ -1,0 +1,70 @@
+---
+title: Air State
+description: Lightweight, modular, and reactive state management.
+---
+
+`air_state` is the reactive engine behind Air Framework. It provides a clean API for managing state units and building reactive UIs.
+
+## Core Concepts
+
+### 1. Global State Access
+
+Access and update state from anywhere using keys.
+
+```dart
+// Set a value
+Air().state<int>('counter', initialValue: 0).value = 5;
+
+// Get a value
+final count = Air().state<int>('counter').value;
+```
+
+### 2. Typed Keys (Recommended)
+
+To avoid "magic strings" and ensure type safety, use `SimpleStateKey`.
+
+```dart
+// 1. Define
+const counterKey = SimpleStateKey<int>('counter', defaultValue: 0);
+
+// 2. Access
+print(counterKey.value);
+
+// 3. Update
+counterKey.value = 10;
+```
+
+### 3. No Providers Required
+
+Unlike other state management solutions in Flutter, Air Framework **does not require a Provider** or any context-based injection at the widget level.
+
+The reactive state is globally accessible and managed by the modules, meaning you can access your `Flows` and `Pulses` from anywhere without passing `BuildContext` down the tree.
+
+---
+
+## Reactive Builders
+
+### AirBuilder
+
+A simple widget that rebuilds when a specific key changes.
+
+```dart
+AirBuilder<int>(
+  stateKey: 'counter',
+  initialValue: 0,
+  builder: (context, value) {
+    return Text('Count: $value');
+  },
+);
+```
+
+### AirView
+
+`AirView` is more powerful. It automatically tracks any state accessed within its builder function and rebuilds only when those specific values change.
+
+```dart
+AirView((context) {
+  // Automatically rebuilds if counterKey.value changes
+  return Text('Current value: ${counterKey.value}');
+});
+```

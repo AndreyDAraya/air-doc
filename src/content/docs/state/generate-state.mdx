@@ -1,0 +1,71 @@
+---
+title: Code Generation
+description: Automating reactivity with @GenerateState.
+---
+
+While `air_state` provides the core reactivity, `air_generator` automates the boilerplate. This pattern is inspired by business logic controllers and ensures a clean separation between state definition and reactive usage.
+
+Es **el estado más puro y reactivo**: es increíble poder simplemente cambiar el valor de una variable y de inmediato tener el nuevo estado reflejado en la UI, sin necesidad de hacer nada más como `emit`, `publish` o usar un `ChangeNotifier`.
+
+## The `@GenerateState` Pattern
+
+By annotating a class with `@GenerateState`, the framework generates two helper classes: `Flows` (data) and `Pulses` (actions).
+
+### State Definition
+
+```dart
+@GenerateState('notifications')
+class NotificationsState extends _NotificationsState {
+  // 1. Private fields automatically become reactive Flows
+  int _unreadCount = 0;
+  bool _isLoading = false;
+
+  // 2. Public void/Future methods automatically become Pulses
+  @override
+  Future<void> markAsRead() async {
+    isLoading = true;
+    await _api.sync();
+    unreadCount = 0; // Direct updates are tracked!
+    isLoading = false;
+  }
+}
+```
+
+### Generated Plumbing
+
+Run `air generate state` to generate the `*.air.g.dart` file. This creates:
+
+- **`NotificationsFlows`**: Contains `StateFlow` objects for `unreadCount` and `isLoading`.
+- **`NotificationsPulses`**: Contains `AirPulse` objects for triggering `markAsRead`.
+
+## Using Flows & Pulses in UI
+
+Instead of accessing the controller directly, the UI uses the generated helpers.
+
+```dart
+class NotificationIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AirView((context) {
+      // Accessing .value tracks the dependency automatically
+      final count = NotificationsFlows.unreadCount.value;
+
+      return Badge(
+        label: Text('$count'),
+        child: Icon(Icons.notifications),
+      );
+    });
+  }
+}
+
+// Triggering an action
+void onRefresh() {
+  NotificationsPulses.markAsRead.pulse(null);
+}
+```
+
+## Benefits
+
+- **Zero Boilerplate**: No `notifyListeners()`, no manual Streams.
+- **Fine-Grained Reactivity**: Rebuilds only what you actually use.
+- **Clean API**: Separate namespaces for data (`Flows`) and actions (`Pulses`).

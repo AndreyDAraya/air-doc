@@ -1,0 +1,41 @@
+---
+title: Installation
+description: How to add Air Framework to your Flutter project.
+---
+
+To get started with Air Framework, you need to add the core packages to your Flutter project and install the CLI for the best developer experience.
+
+## 1. Add Dependencies
+
+Add `air_framework` to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  air_framework: ^1.0.0
+```
+
+For the reactive state management and code generation, add these to your `dev_dependencies`:
+
+```yaml
+dev_dependencies:
+  air_generator: ^1.0.0
+  build_runner: ^2.4.0
+```
+
+## 2. Install Air CLI
+
+The **Air CLI** is the recommended way to create projects and scaffold modules. Activate it globally using Dart:
+
+```bash
+dart pub global activate air_cli
+```
+
+## 3. Verify Installation
+
+Run the following command to verify that the CLI is correctly installed:
+
+```bash
+air doctor
+```
+
+This will check your environment and ensure everything is ready for development.

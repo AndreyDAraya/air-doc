@@ -1,0 +1,58 @@
+---
+title: CLI Reference
+description: Complete guide to the Air CLI commands.
+---
+
+The Air CLI is your Swiss Army knife for building modular Flutter apps.
+
+## Installation
+
+```bash
+dart pub global activate air_cli
+```
+
+## Commands
+
+### `air create`
+
+Initializes a new Air project.
+
+```bash
+air create <project_name> --org=com.example --template=starter
+```
+
+### `air generate` (alias: `g`)
+
+Scaffolds various framework components.
+
+| Type        | Command                | Description                 |
+| ----------- | ---------------------- | --------------------------- |
+| **Module**  | `air g module <name>`  | Creates a feature module.   |
+| **Screen**  | `air g screen <name>`  | Creates a UI page.          |
+| **State**   | `air g state <name>`   | Creates reactive state.     |
+| **Service** | `air g service <name>` | Creates a business service. |
+| **Model**   | `air g model <name>`   | Creates a data model.       |
+
+### `air module`
+
+Manages external modules.
+
+```bash
+# Add from Git
+air module add https://github.com/user/module.git
+
+# Add from Local Path
+air module add /path/to/local/module
+```
+
+### `air doctor`
+
+Diagnoses your project and environment.
+
+```bash
+air doctor
+```
+
+## Best Practices
+
+Always use the CLI to generate modules and state to ensure naming conventions and directory structures are followed.

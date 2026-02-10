@@ -1,0 +1,56 @@
+---
+title: Permissions & Security
+description: Protecting module boundaries and sensitive data.
+---
+
+Air Framework provides a robust security layer designed to manage interactions between modules, especially useful in enterprise environments.
+
+## Permission System
+
+The framework uses a declarative permission system. Each module can declare what actions it is allowed to perform.
+
+### 1. Define Permissions
+
+```dart
+const authPermissions = ModulePermissions([
+  ScopedPermission(Permission.dataRead),
+  ScopedPermission(Permission.dataWrite, 'user.*'),
+  ScopedPermission(Permission.serviceCall, 'auth.*'),
+]);
+
+PermissionChecker().registerModule('auth', authPermissions);
+```
+
+### 2. Enforcement Modes
+
+- **Debug Mode (Default)**: Permission violations only log a **Yellow Warning** to the console but allow the action to proceed. This ensures fast development.
+- **Strict Mode**: Violations throw a `SecurityException`. Enable this in production:
+  ```dart
+  PermissionChecker().enable(); // Enable strict enforcement
+  ```
+
+## Secure Service Registry
+
+Instead of registering services directly in the DI, you can use the `SecureServiceRegistry` to restrict who can call your services.
+
+```dart
+SecureServiceRegistry().registerService(
+  name: 'payments.process',
+  ownerModuleId: 'payments',
+  service: (amount) => _process(amount),
+  allowedCallers: ['checkout'], // Only 'checkout' module can call this
+);
+```
+
+## Secure Data with TTL
+
+You can store shared data that automatically expires after a certain time.
+
+```dart
+SecureServiceRegistry().setSecureData<String>(
+  'auth.token',
+  'jwt-content',
+  callerModuleId: 'auth',
+  ttl: Duration(hours: 2),
+);
+```

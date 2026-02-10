@@ -1,0 +1,35 @@
+---
+title: Best Practices
+description: Guidelines for building industrial-grade apps.
+---
+
+To get the most out of the Air Framework, follow these professional guidelines.
+
+## Module Granularity
+
+- **Keep modules focused**: A module should represent a single feature or domain (e.g., `Auth`, `Catalog`, `Payment`).
+- **Avoid "Shared" or "Common" modules**: Instead of a massive shared module, use focused packages or core modules with clear boundaries.
+
+## Encapsulation
+
+- **Never import between modules**: If `Module A` needs something from `Module B`, use the **Event Bus** or a **Service Interface**.
+- **Use internal routes**: Manage navigation within the module whenever possible to keep the external API small.
+
+## State Management
+
+- **View Logic vs Business Logic**:
+  - Use `AirState` for logic that controls the UI (loading states, input validation).
+  - Use `Services` for logic that is independent of the UI (API calls, data processing).
+- **Naming**:
+  - **Pulses (Verbs)**: `login`, `fetchData`, `updateProfile`.
+  - **Flows (Nouns)**: `userProfile`, `isLoading`, `products`.
+
+## Dependency Management
+
+- **Declare everything**: Use `AppModule.dependencies` to explicitly state what other modules your module needs.
+- **Lazy Registration**: Use `registerLazySingleton` to keep initial load times fast.
+
+## Testing
+
+- **Mock everything**: Use `AirDI().register(mock, allowOverwrite: true)` in your tests to swap real services for mocks.
+- **Isolate tests**: Clear the DI container between tests using `AirDI().clear()`.

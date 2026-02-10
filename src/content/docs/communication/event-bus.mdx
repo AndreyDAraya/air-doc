@@ -1,0 +1,82 @@
+---
+title: Event Bus
+description: Decoupled inter-module communication.
+---
+
+The `EventBus` is the primary way for modules to communicate without being tightly coupled. It supports both strongly-typed events and lightweight named signals.
+
+## Typed Events
+
+Use `Typed Events` for critical business logic where you need compile-time safety.
+
+### 1. Define an Event
+
+Extend `ModuleEvent` and provide a `sourceModuleId`.
+
+```dart
+class UserLoggedInEvent extends ModuleEvent {
+  final String userId;
+  final String email;
+
+  UserLoggedInEvent({
+    required super.sourceModuleId,
+    required this.userId,
+    required this.email,
+  });
+}
+```
+
+### 2. Emit and Listen
+
+```dart
+// Emit
+EventBus().emit(UserLoggedInEvent(
+  sourceModuleId: 'auth',
+  userId: '123',
+  email: 'user@example.com',
+));
+
+// Listen
+EventBus().on<UserLoggedInEvent>((event) {
+  print('User ${event.email} logged in');
+}, subscriberModuleId: 'home');
+```
+
+## Named Signals
+
+Signals are lightweight, dynamic messages identified by a string name.
+
+```dart
+// Emit
+EventBus().emitSignal('cart.updated', data: {'count': 5}, sourceModuleId: 'cart');
+
+// Listen
+EventBus().onSignal('cart.updated', (data) {
+  print('New count: ${data['count']}');
+}, subscriberModuleId: 'header');
+```
+
+## Middleware
+
+You can intercept all events or signals to add global logic like logging or analytics.
+
+```dart
+EventBus().addMiddleware((event, next) {
+  print('Log: ${event.runtimeType} from ${event.sourceModuleId}');
+  next(event); // Continue the chain
+});
+```
+
+## Schema Validation (Optional)
+
+For large teams, you can enforce the structure of signals at runtime.
+
+```dart
+EventSchemaValidator().registerSignalSchema(
+  'user.register',
+  MapSchema({
+    'email': StringSchema(required: true),
+    'age': NumberSchema(min: 18),
+  }),
+);
+```

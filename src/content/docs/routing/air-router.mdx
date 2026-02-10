@@ -1,0 +1,56 @@
+---
+title: Routing Guide
+description: Distributed routing with AirRouter and go_router.
+---
+
+Air Framework leverages `go_router` for navigation but simplifies it by allowing each module to define its own routes.
+
+## Defining Routes
+
+Each module contributes to the global routing table by returning a list of `AirRoute` objects.
+
+```dart
+class CatalogModule extends AppModule {
+  @override
+  List<AirRoute> get routes => [
+    AirRoute(
+      path: '/catalog',
+      builder: (context, state) => const CatalogView(),
+      routes: [
+        AirRoute(
+          path: ':id',
+          builder: (context, state) => ProductDetailView(id: state.pathParameters['id']!),
+        ),
+      ],
+    ),
+  ];
+}
+```
+
+## Navigation
+
+Since it's built on `go_router`, you can use all standard navigation methods.
+
+```dart
+context.go('/catalog');
+context.push('/catalog/123');
+```
+
+## Shell Routes (Persistent Layouts)
+
+You can define shell routes for persistent UIs (like bottom navigation bars).
+
+```dart
+AirRoute(
+  path: '/app',
+  builder: (context, state) => MainScaffold(child: state.child),
+  routes: [
+    AirRoute(path: 'home', builder: (_, __) => HomeView()),
+    AirRoute(path: 'settings', builder: (_, __) => SettingsView()),
+  ],
+)
+```
+
+## Route Aggregation
+
+The `ModuleManager` collects all routes from all registered modules and provides them to the `AirRouter`, which builds the final configuration for `MaterialApp.router`.
