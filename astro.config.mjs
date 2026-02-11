@@ -37,8 +37,8 @@ export default defineConfig({
 					label: 'State Management',
 					items: [
 						{ label: 'Air State', slug: 'state/air-state' },
-						{ label: 'Flows & Pulses', slug: 'state/flows-and-pulses' },
 						{ label: 'Code Generation', slug: 'state/generate-state' },
+						{ label: 'Flows & Pulses', slug: 'state/flows-and-pulses' },
 						{ label: 'AirView', slug: 'state/air-view' },
 					],
 				},
