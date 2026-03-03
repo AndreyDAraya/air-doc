@@ -32,6 +32,7 @@ Scaffolds various framework components.
 | **State**   | `air g state <name>`   | Creates reactive state.     |
 | **Service** | `air g service <name>` | Creates a business service. |
 | **Model**   | `air g model <name>`   | Creates a data model.       |
+| **Adapter** | `air g adapter <name>` | Creates a headless adapter. |
 
 ### `air module`
 
@@ -53,6 +54,23 @@ Diagnoses your project and environment.
 air doctor
 ```
 
+### `air skills`
+
+Installs the Air Framework AI agent skill so coding agents (Antigravity, Claude Code, OpenCode, Cursor) understand the framework automatically.
+
+```bash
+# Interactive selection
+air skills install
+
+# Specific agent
+air skills install cursor
+
+# All agents
+air skills install all
+```
+
+See the [AI Agent Skills](/cli/skills/) guide for details.
+
 ## Best Practices
 
-Always use the CLI to generate modules and state to ensure naming conventions and directory structures are followed.
+Always use the CLI to generate modules, adapters, and state to ensure naming conventions and directory structures are followed.

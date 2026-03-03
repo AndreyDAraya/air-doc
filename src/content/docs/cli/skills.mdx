@@ -1,0 +1,91 @@
+---
+title: AI Agent Skills
+description: How Air Framework integrates with AI coding agents to boost productivity.
+---
+
+Air Framework includes an **AI skill system** that teaches coding agents (Antigravity, Claude Code, OpenCode, Cursor, etc.) how the framework works. Once installed, your AI agent automatically understands the architecture, conventions, and best practices — no more explaining the framework in every prompt.
+
+## What Are Skills?
+
+A **skill** is a structured set of documentation files that AI agents read to understand a framework, library, or codebase. Air Framework ships a comprehensive skill covering:
+
+- Module system & lifecycle (`onBind`, `onInit`, `onDispose`)
+- Adapter system & contract pattern
+- State management (Flows, Pulses, `AirView`)
+- Dependency injection (`AirDI`)
+- CLI commands & generators
+- Cross-module communication (EventBus)
+- Architecture patterns & best practices
+
+## Installing the Skill
+
+```bash
+# Interactive — choose your agent
+air skills install
+
+# Specific agent
+air skills install antigravity
+air skills install cursor
+air skills install claude
+air skills install opencode
+
+# Install for all agents at once
+air skills install all
+```
+
+## What Happens After Installation?
+
+The command copies the Air Framework skill files into the correct directory for your agent:
+
+| Agent           | Directory                                   |
+| --------------- | ------------------------------------------- |
+| **Antigravity** | `.gemini/antigravity/skills/air_framework/` |
+| **Claude Code** | `.agent/skills/air_framework/`              |
+| **OpenCode**    | `.agent/skills/air_framework/`              |
+| **Cursor**      | `.cursor/rules/air_framework/`              |
+
+It also registers the skill in `AGENTS.md` so agents automatically discover and load it.
+
+## Skill Structure
+
+```text
+air_framework/
+├── SKILL.md                        ← Main instruction file
+└── references/
+    ├── modules.md                  ← Module system & lifecycle
+    ├── adapters.md                 ← Adapter system & contracts
+    ├── state.md                    ← State management
+    ├── di.md                       ← Dependency injection
+    ├── cli.md                      ← CLI commands
+    ├── communication.md            ← EventBus & signals
+    ├── best_practices.md           ← Architecture patterns
+    └── quick_reference.md          ← Cheat sheet
+```
+
+## What Your AI Agent Can Do After Installation
+
+Once the skill is installed, your AI agent can:
+
+- **Generate modules** following the exact Air Framework conventions
+- **Create adapters** with the correct contract pattern
+- **Build reactive state** using `@GenerateState`, Flows, and Pulses
+- **Wire up DI** correctly with `onBind` (sync) and `onInit` (async)
+- **Follow the boot order** — Adapters → Modules → App
+- **Use the CLI** commands to scaffold components
+- **Apply best practices** automatically
+
+## Example: AI-Powered Development
+
+After installing the skill, you can ask your AI agent:
+
+> "Create a products module with an API service that uses HttpClient"
+
+And the agent will automatically:
+
+1. Create the module in `lib/modules/products/`
+2. Register it with `ModuleManager` in the correct order
+3. Use the abstract `HttpClient` contract (not Dio directly)
+4. Follow naming conventions and file structure
+5. Wire up DI correctly in `onBind`
+
+No need to explain the framework — the agent already knows.

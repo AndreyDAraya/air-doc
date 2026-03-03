@@ -1,0 +1,163 @@
+---
+title: Adapters
+description: Headless service integrations for HTTP, analytics, error tracking, and more.
+---
+
+Adapters are headless service integrations for the Air Framework. Unlike modules, they have **no routes and no UI** — they register infrastructure services in `AirDI` for modules to consume.
+
+## Adapter vs Module
+
+| Aspect         | Module (`AppModule`) | Adapter (`AirAdapter`) |
+| -------------- | -------------------- | ---------------------- |
+| Purpose        | Feature (UI + logic) | Infrastructure service |
+| Has routes?    | ✅ Yes               | ❌ No                  |
+| Has UI?        | ✅ Yes               | ❌ No                  |
+| Registered via | `ModuleManager`      | `AdapterManager`       |
+| Boot order     | After adapters       | Before modules         |
+
+## Creating an Adapter
+
+Use the CLI to scaffold an adapter:
+
+```bash
+air g adapter sentry
+```
+
+This creates:
+
+```text
+lib/adapters/sentry/
+├── contracts/
+│   ├── sentry_client.dart      ← abstract contract
+│   └── sentry_response.dart    ← response wrapper
+├── sentry_adapter.dart          ← AirAdapter subclass
+└── sentry_impl.dart             ← concrete implementation
+```
+
+## The AirAdapter Class
+
+Extend `AirAdapter` and override the lifecycle hooks:
+
+```dart
+class DioAdapter extends AirAdapter {
+  final String baseUrl;
+  DioAdapter({required this.baseUrl});
+
+  @override
+  String get id => 'dio';
+
+  @override
+  String get name => 'Dio HTTP Client';
+
+  @override
+  String get version => '1.0.0';
+
+  @override
+  void onBind(AirDI di) {
+    super.onBind(di);
+    final dio = Dio(BaseOptions(baseUrl: baseUrl));
+
+    // Register the abstract contract — modules use HttpClient, not Dio
+    di.registerLazySingleton<HttpClient>(() => DioHttpClient(dio));
+  }
+
+  @override
+  Future<void> onDispose(AirDI di) async {
+    di.tryGet<Dio>()?.close();
+    super.onDispose(di);
+  }
+}
+```
+
+## The Contract Rule
+
+:::caution[Every adapter MUST have a contract]
+Modules should depend on the **abstract contract**, never on the underlying library directly.
+:::
+
+```dart
+// ❌ BAD — modules are coupled to Dio
+di.registerSingleton<Dio>(dio);
+
+// ✅ GOOD — modules depend on HttpClient
+di.registerLazySingleton<HttpClient>(() => DioHttpClient(dio));
+```
+
+This enables swapping the underlying library (e.g., Dio → `http`) without touching any module code.
+
+## Boot Order
+
+Adapters must be registered **before** modules so that modules can safely access adapter-provided services.
+
+```dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  configureAirState();
+
+  // 1. Adapters (infrastructure) — FIRST
+  final adapters = AdapterManager();
+  await adapters.register(DioAdapter(baseUrl: 'https://api.example.com'));
+
+  // 2. Modules (features) — SECOND
+  final manager = ModuleManager();
+  await manager.register(ProductsModule());  // can use HttpClient ✅
+  await manager.register(ShellModule());
+
+  runApp(const MyApp());
+}
+```
+
+## Using Adapter Services in Modules
+
+Modules depend on the contract, never the implementation:
+
+```dart
+class ProductsModule extends AppModule {
+  @override
+  void onBind(AirDI di) {
+    // HttpClient is provided by DioAdapter
+    di.registerLazySingleton<ProductService>(
+      () => ProductService(di.get<HttpClient>()),
+    );
+  }
+}
+```
+
+```dart
+class ProductService {
+  final HttpClient _http; // abstract — no Dio import
+
+  ProductService(this._http);
+
+  Future<List<Product>> getAll() async {
+    final response = await _http.get('/products');
+    return (response.data as List)
+        .map((j) => Product.fromJson(j))
+        .toList();
+  }
+}
+```
+
+## Naming Conventions
+
+| Element        | Convention                                | Example                             |
+| -------------- | ----------------------------------------- | ----------------------------------- |
+| Folder         | `adapters/<name>/`                        | `adapters/dio/`, `adapters/sentry/` |
+| Contract       | `<Name>Client`                            | `HttpClient`, `ErrorReporter`       |
+| Implementation | `<Name>ClientImpl` or `<Lib><Name>Client` | `DioHttpClient`                     |
+| Adapter class  | `<Name>Adapter`                           | `DioAdapter`, `SentryAdapter`       |
+| Response       | `<Name>Response`                          | `HttpResponse`, `SentryResponse`    |
+
+## DevTools
+
+Registered adapters appear in the **ADAPTERS** tab of the DevTools inspector, showing their id, name, version, and state.
+
+## Common Adapter Examples
+
+| Adapter           | Contract          | Library              |
+| ----------------- | ----------------- | -------------------- |
+| `DioAdapter`      | `HttpClient`      | `dio`                |
+| `SentryAdapter`   | `ErrorReporter`   | `sentry_flutter`     |
+| `HiveAdapter`     | `StorageClient`   | `hive`               |
+| `FirebaseAdapter` | `AnalyticsClient` | `firebase_analytics` |
+| `StripeAdapter`   | `PaymentClient`   | `stripe_sdk`         |

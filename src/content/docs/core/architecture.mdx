@@ -24,6 +24,7 @@ graph TD
     Bus[EventBus]
     Router[AirRouter]
     State[AirState]
+    Adapters[AdapterManager]
     end
 
     Notes --> CoreF
@@ -36,17 +37,21 @@ graph TD
 
 Everything is a module. Modules are self-contained, meaning they contain their own UI, business logic, and even their own routes. This prevents the "Big Ball of Mud" where everything is tightly coupled.
 
-### 2. Reactive State
+### 2. Adapters
+
+Infrastructure services (HTTP, analytics, error tracking) are integrated via **Adapters** — headless components that register abstract contracts in `AirDI`. Modules depend on these contracts, never on the underlying library. This enables swapping implementations without touching module code. See the [Adapters guide](/core/adapters/) for details.
+
+### 3. Reactive State
 
 State management is handled per module. By using the `@GenerateState` pattern, we achieve unidirectional data flow (Pulse -> State -> Flow -> UI) and fine-grained reactivity.
 
-### 3. Explicit Communication
+### 4. Explicit Communication
 
 Modules do not call each other directly. They communicate via:
 
 - **Dependency Injection**: One module can request a service registered by another.
 - **Event Bus**: Modules emit and listen to events and signals.
 
-### 4. Decoupled Routing
+### 5. Decoupled Routing
 
 Routing is distributed across modules. The framework aggregates these routes into a single `go_router` configuration at runtime.

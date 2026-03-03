@@ -25,6 +25,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Architecture', slug: 'core/architecture' },
 						{ label: 'Modules', slug: 'core/modules' },
+						{ label: 'Adapters', slug: 'core/adapters' },
 					],
 				},
 				{
@@ -64,6 +65,7 @@ export default defineConfig({
 					label: 'Reference',
 					items: [
 						{ label: 'CLI Reference', slug: 'cli/overview' },
+						{ label: 'AI Agent Skills', slug: 'cli/skills' },
 						{ label: 'Best Practices', slug: 'guides/best-practices' },
 						{ label: 'Packages Overview', slug: 'packages/overview' },
 					],
