@@ -9,7 +9,6 @@ export default defineConfig({
 		astroMermaid(),
 		starlight({
 			title: 'Air Framework',
-
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/AndreyDAraya/air-framework' }],
 			sidebar: [
 				{
