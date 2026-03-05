@@ -9,6 +9,12 @@ Es **el estado más puro y reactivo**: es increíble poder simplemente cambiar e
 
 ## The `@GenerateState` Pattern
 
+The fastest way to create a new state controller is via the CLI:
+
+```bash
+air g state notifications --module=notifications
+```
+
 By annotating a class with `@GenerateState`, the framework generates two helper classes: `Flows` (data) and `Pulses` (actions).
 
 ### State Definition

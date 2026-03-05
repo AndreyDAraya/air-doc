@@ -16,7 +16,13 @@ cd my_app
 
 ## 2. Define a Module
 
-Create a module by extending `AppModule`. A module encapsulates your routes and dependencies.
+Scaffold a module using the CLI. This creates the directory structure and the base `AppModule` class:
+
+```bash
+air g module counter
+```
+
+This will create `lib/modules/counter/counter_module.dart`. A module encapsulates your routes and dependencies:
 
 ```dart
 // lib/modules/counter/counter_module.dart
@@ -43,7 +49,13 @@ class CounterModule extends AppModule {
 
 ## 3. Define Reactive State
 
-Use the `@GenerateState` annotation. The framework will generate the reactive plumbing for you.
+Generate a reactive state controller:
+
+```bash
+air g state counter --module=counter
+```
+
+This scaffolds `lib/modules/counter/ui/state/counter_state.dart`. Use the `@GenerateState` annotation:
 
 ```dart
 // lib/modules/counter/ui/state/state.dart
@@ -66,10 +78,20 @@ class CounterState extends _CounterState {
 
 ## 4. Run Code Generation
 
-Run build_runner to generate the `state.air.g.dart` file:
+To generate the reactive plumbing (`state.air.g.dart`), you need to run the build runner. This is required whenever you add or modify a `@GenerateState` class.
 
+### Recommended Command
 ```bash
-air generate state
+dart run build_runner build --delete-conflicting-outputs
+```
+
+> [!TIP]
+> Use `dart run build_runner watch --delete-conflicting-outputs` during development to automatically regenerate code whenever you save changes.
+
+### Using Air CLI
+You can also use the CLI to scaffold the initial state structure:
+```bash
+air generate state counter --module=counter
 ```
 
 ## 5. Build Reactive UI

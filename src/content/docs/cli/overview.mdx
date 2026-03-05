@@ -25,14 +25,14 @@ air create <project_name> --org=com.example --template=starter
 
 Scaffolds various framework components.
 
-| Type        | Command                | Description                 |
-| ----------- | ---------------------- | --------------------------- |
-| **Module**  | `air g module <name>`  | Creates a feature module.   |
-| **Screen**  | `air g screen <name>`  | Creates a UI page.          |
-| **State**   | `air g state <name>`   | Creates reactive state.     |
-| **Service** | `air g service <name>` | Creates a business service. |
-| **Model**   | `air g model <name>`   | Creates a data model.       |
-| **Adapter** | `air g adapter <name>` | Creates a headless adapter. |
+| Type        | Command                               | Description                 |
+| ----------- | ------------------------------------- | --------------------------- |
+| **Module**  | `air g module <name>`                 | Creates a feature module.   |
+| **Screen**  | `air g screen <name> --module=<m>`    | Creates a UI page.          |
+| **State**   | `air g state <name> --module=<m>`     | Creates reactive state.     |
+| **Service** | `air g service <name> --module=<m>`   | Creates a business service. |
+| **Model**   | `air g model <name> --module=<m>`     | Creates a data model.       |
+| **Adapter** | `air g adapter <name>`                | Creates a headless adapter. |
 
 ### `air module`
 

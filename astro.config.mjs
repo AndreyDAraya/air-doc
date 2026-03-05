@@ -20,6 +20,13 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Air CLI',
+					items: [
+						{ label: 'CLI Reference', slug: 'cli/overview' },
+						{ label: 'AI Agent Skills', slug: 'cli/skills' },
+					],
+				},
+				{
 					label: 'Core Concepts',
 					items: [
 						{ label: 'Architecture', slug: 'core/architecture' },
@@ -63,8 +70,6 @@ export default defineConfig({
 				{
 					label: 'Reference',
 					items: [
-						{ label: 'CLI Reference', slug: 'cli/overview' },
-						{ label: 'AI Agent Skills', slug: 'cli/skills' },
 						{ label: 'Best Practices', slug: 'guides/best-practices' },
 						{ label: 'Packages Overview', slug: 'packages/overview' },
 					],

@@ -3,39 +3,53 @@ title: Installation
 description: How to add Air Framework to your Flutter project.
 ---
 
-To get started with Air Framework, you need to add the core packages to your Flutter project and install the CLI for the best developer experience.
+To get started with Air Framework, the recommended path is to install the CLI first. It automates package management, project scaffolding, and code generation.
 
-## 1. Add Dependencies
+## 1. Install Air CLI
 
-Add `air_framework` to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  air_framework: ^1.0.0
-```
-
-For the reactive state management and code generation, add these to your `dev_dependencies`:
-
-```yaml
-dev_dependencies:
-  air_generator: ^1.0.0
-  build_runner: ^2.4.0
-```
-
-## 2. Install Air CLI
-
-The **Air CLI** is the recommended way to create projects and scaffold modules. Activate it globally using Dart:
+The **Air CLI** is the core tool for building with Air Framework. Activate it globally using Dart:
 
 ```bash
 dart pub global activate air_cli
 ```
 
-## 3. Verify Installation
+### Verify Installation
 
-Run the following command to verify that the CLI is correctly installed:
+Run the following command to ensure the CLI is ready:
 
 ```bash
 air doctor
 ```
 
-This will check your environment and ensure everything is ready for development.
+## 2. Start a New Project
+
+The easiest way to initialize a project with all dependencies correctly configured is using the CLI:
+
+```bash
+air create my_app
+cd my_app
+```
+
+This command automatically adds `air_framework`, `air_generator`, and necessary dev dependencies to your project.
+
+## 3. Manual Installation
+
+If you prefer to add Air Framework to an existing project manually:
+
+### Add Dependencies
+
+Add `air_framework` to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  air_framework: any # latest version
+```
+
+For reactive state management and code generation, add these to your `dev_dependencies`:
+
+```yaml
+dev_dependencies:
+  air_generator: any # latest version
+  build_runner: any # latest version
+```
+
