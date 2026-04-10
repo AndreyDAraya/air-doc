@@ -51,20 +51,27 @@ class MyModule extends AppModule {
 
   @override
   void onBind(AirDI di) {
+    super.onBind(di); // ⚠️ Always call super first
     // Register your services here (Sync ONLY)
   }
 
   @override
   Future<void> onInit(AirDI di) async {
+    await super.onInit(di); // ⚠️ Always call super first
     // Perform async initialization (DB, API checks)
   }
 
   @override
   Future<void> onDispose(AirDI di) async {
+    await super.onDispose(di); // ⚠️ Always call super first
     // Cleanup resources
   }
 }
 ```
+
+:::caution[Always call super]
+The `onBind`, `onInit`, and `onDispose` hooks **must always** call their `super` counterpart as the very first statement. Skipping `super.onBind(di)` prevents the framework from registering internal services, which will cause `AirDI` lookups to fail silently at runtime.
+:::
 
 ## Lifecycle
 

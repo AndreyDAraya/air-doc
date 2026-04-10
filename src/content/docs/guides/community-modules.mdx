@@ -1,0 +1,113 @@
+---
+title: Community Modules
+description: Discover, install, and create community modules for Air Framework.
+---
+
+Community modules are self-contained Air Framework modules distributed via Git. They can be added to any Air project with a single command and immediately integrate with the module lifecycle, DI, and routing.
+
+## Installing a Community Module
+
+```bash
+# From a GitHub repository
+air module add https://github.com/user/air-analytics.git
+
+# From a local path (useful during development)
+air module add /path/to/local/module
+```
+
+The CLI clones the module into `lib/modules/<module-name>/` and registers it in your project. No manual wiring required.
+
+## What Happens After Install
+
+1. The module directory is copied to `lib/modules/`.
+2. The module class is imported and registered with `ModuleManager` in `main.dart`.
+3. Its routes, services, and DI registrations are available immediately.
+
+```dart
+// main.dart — auto-generated after install
+await ModuleManager().register([
+  AuthModule(),
+  CatalogModule(),
+  AnalyticsModule(), // ← auto-added by air module add
+]);
+```
+
+## Creating a Community Module
+
+Use the CLI to scaffold a module following the community standards:
+
+```bash
+air create community-module my_feature_module
+```
+
+This generates a standalone Flutter package in the current directory:
+
+```text
+my_feature_module/
+├── lib/
+│   └── my_feature_module/
+│       ├── my_feature_module.dart      ← Public exports
+│       ├── my_feature_module_module.dart  ← AppModule subclass
+│       ├── ui/
+│       │   ├── views/
+│       │   └── state/
+│       ├── services/
+│       └── models/
+├── test/
+│   └── my_feature_module_test.dart
+├── pubspec.yaml
+└── README.md
+```
+
+## Community Module Standards
+
+For a module to work correctly as a community module, it must:
+
+- **Extend `AppModule`** and implement `id`, `routes`, `onBind`, and `onInit`.
+- **Declare dependencies** explicitly via `AppModule.dependencies` (e.g. `['auth:^1.0.0']`).
+- **Not hard-code infrastructure**: Use adapters (HTTP, storage) via `AirDI` contracts rather than direct Dio or SharedPreferences calls.
+- **Include tests**: At minimum, unit tests for state controllers and services.
+- **Document the API**: A `README.md` with installation instructions and configuration options.
+
+## Example: A Minimal Community Module
+
+```dart
+// lib/air_analytics/air_analytics_module.dart
+import 'package:air_framework/air_framework.dart';
+
+class AirAnalyticsModule extends AppModule {
+  @override
+  String get id => 'analytics';
+
+  @override
+  List<String> get dependencies => [];
+
+  @override
+  List<AirRoute> get routes => []; // This module has no UI
+
+  @override
+  void onBind(AirDI di) {
+    super.onBind(di); // ⚠️ Required
+    di.registerLazySingleton<AnalyticsService>(() => AnalyticsService());
+  }
+
+  @override
+  Future<void> onInit(AirDI di) async {
+    await super.onInit(di); // ⚠️ Required
+    await di.get<AnalyticsService>().init();
+  }
+}
+```
+
+## Publishing to the Community
+
+To share your module with the Air Framework community:
+
+1. Push the module to a public GitHub repository.
+2. Tag a release (e.g. `v1.0.0`) following semantic versioning.
+3. Add `air_community_module` as a topic on GitHub so others can discover it.
+4. Open a PR to the [Air Framework community registry](https://github.com/AndreyDAraya/air-framework) to get it listed in the official docs.
+
+:::tip[Tip: version your module]
+Use semantic versioning in your module's `version` getter so teams that depend on it can use Air's dependency resolution system (`AppModule.dependencies`) to pin specific versions.
+:::

@@ -51,7 +51,59 @@ Modules do not call each other directly. They communicate via:
 
 - **Dependency Injection**: One module can request a service registered by another.
 - **Event Bus**: Modules emit and listen to events and signals.
+## Module Lifecycle
 
-### 5. Decoupled Routing
+The `ModuleManager` orchestrates every module through a strict sequence:
 
-Routing is distributed across modules. The framework aggregates these routes into a single `go_router` configuration at runtime.
+```mermaid
+sequenceDiagram
+    participant App
+    participant ModuleManager
+    participant Module
+    participant AirDI
+
+    App->>ModuleManager: register(MyModule())
+    ModuleManager->>Module: onBind(di)
+    Note over Module,AirDI: Register services synchronously
+    Module->>AirDI: di.registerLazySingleton<MyService>(...)
+    ModuleManager->>Module: onInit(di)
+    Note over Module,AirDI: Async setup — DB, API, initial pulses
+    Module->>AirDI: di.get<MyService>().init()
+    ModuleManager-->>App: Module is Ready ✓
+```
+
+## Before / After: Adding a Feature
+
+Without Air Framework, adding a new feature means touching shared files, introducing hidden coupling, and breaking existing tests. With Air Framework, each feature is fully isolated.
+
+**❌ Before — Unstructured**
+
+```dart
+// main.dart — grows unbounded
+void main() {
+  final authService = AuthService();
+  final catalogService = CatalogService(authService); // tight coupling!
+  final cartService = CartService(catalogService);
+  // ...every new feature requires touching main.dart
+}
+```
+
+**✅ After — Air Framework**
+
+```dart
+// main.dart — stays minimal forever
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  configureAirState();
+
+  await ModuleManager().register([
+    AuthModule(),
+    CatalogModule(), // owns its own DI, routes, and state
+    CartModule(),    // declares 'catalog:^1.0.0' as a dependency
+  ]);
+
+  runApp(MaterialApp.router(routerConfig: AirRouter().router));
+}
+```
+
+Each module brings its own services, routes, and state. `main.dart` never grows — new features are just new modules registered in the list.

@@ -54,3 +54,49 @@ AirRoute(
 ## Route Aggregation
 
 The `ModuleManager` collects all routes from all registered modules and provides them to the `AirRouter`, which builds the final configuration for `MaterialApp.router`.
+
+## AirRouter Singleton
+
+`AirRouter` is a singleton — access the same instance anywhere in your app without passing it around.
+
+```dart
+// In main.dart
+runApp(MaterialApp.router(
+  routerConfig: AirRouter().router,
+));
+
+// From anywhere else — same instance
+AirRouter().router.go('/catalog');
+```
+
+:::caution[One instance]
+Never create multiple `AirRouter()` instances expecting different router configurations. The singleton holds all aggregated routes from registered modules — creating a second instance before modules are registered returns an empty router.
+:::
+
+## Navigation Guards
+
+Use `go_router`'s `redirect` parameter inside an `AirRoute` to protect routes based on authentication state or permissions.
+
+```dart
+class AuthModule extends AppModule {
+  @override
+  List<AirRoute> get routes => [
+    AirRoute(
+      path: '/dashboard',
+      builder: (context, state) => const DashboardView(),
+      redirect: (context, state) {
+        // Redirect to login if user is not authenticated
+        final isLoggedIn = AuthFlows.isLoggedIn.value;
+        if (!isLoggedIn) return '/login';
+        return null; // null = allow navigation
+      },
+    ),
+    AirRoute(
+      path: '/login',
+      builder: (context, state) => const LoginView(),
+    ),
+  ];
+}
+```
+
+Guards compose naturally — every module can protect its own routes independently. There's no need for a global router with a massive `redirect` function.

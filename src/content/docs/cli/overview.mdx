@@ -71,6 +71,43 @@ air skills install all
 
 See the [AI Agent Skills](/cli/skills/) guide for details.
 
+### `air update`
+
+Updates the Air CLI to the latest published version.
+
+```bash
+air update
+```
+
+### `air version`
+
+Prints the currently installed Air CLI version.
+
+```bash
+air version
+# Air CLI v1.0.9
+```
+
+### `air clean`
+
+Removes generated code artifacts (`*.air.g.dart`) from the project. Useful when switching branches or resolving stale code generation conflicts.
+
+```bash
+air clean
+```
+
+## Usage Example: State Generation
+
+```bash
+# Generate a state controller inside the 'cart' module
+air g state cart --module=cart
+
+# This creates:
+# lib/modules/cart/ui/state/cart_state.dart
+# Run build_runner to generate the reactive plumbing:
+dart run build_runner build --delete-conflicting-outputs
+```
+
 ## Best Practices
 
 Always use the CLI to generate modules, adapters, and state to ensure naming conventions and directory structures are followed.

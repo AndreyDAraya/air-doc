@@ -9,6 +9,20 @@ description: Lightweight, modular, and reactive state management.
 While you can manage state manually, the recommended way is using the CLI to generate reactive states with `@GenerateState`. This eliminates boilerplate and provides better type safety.
 :::
 
+## Initialization
+
+Before using any `air_state` API, you must initialize the reactive runtime once at app startup:
+
+| Step | Code | When |
+| ---- | ---- | ---- |
+| **1. Initialize** | `configureAirState()` | `main()` — before everything else |
+| **2. Register module** | `ModuleManager().register(MyModule())` | after `configureAirState()` |
+| **3. Access flows** | `MyFlows.someValue.value` | inside `AirView` or `AirBuilder` |
+| **4. Trigger pulses** | `MyPulses.doSomething.pulse(null)` | from UI event handlers |
+
+:::caution[Call `configureAirState()` first]
+`configureAirState()` must be called **before** any module registration or state access. It registers the reactive scheduler that makes dependency tracking work. Calling it after module registration will cause `AirView` to render stale values without rebuilding.
+:::
 
 ## Core Concepts
 

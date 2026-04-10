@@ -31,5 +31,82 @@ To get the most out of the Air Framework, follow these professional guidelines.
 
 ## Testing
 
-- **Mock everything**: Use `AirDI().register(mock, allowOverwrite: true)` in your tests to swap real services for mocks.
-- **Isolate tests**: Clear the DI container between tests using `AirDI().clear()`.
+### Unit Tests: State Controllers
+
+State classes are plain Dart objects — test them directly without Flutter or a widget tree.
+
+```dart
+setUp(() {
+  AirDI().clear();
+  configureAirState();
+});
+
+tearDown(() => AirDI().clear());
+
+test('increment increases count', () {
+  final state = CounterState();
+  state.increment();
+  expect(CounterFlows.count.value, 1);
+});
+
+test('initial count is zero', () {
+  expect(CounterFlows.count.value, 0);
+});
+```
+
+### Service Tests: Mock via AirDI
+
+Replace real services with mocks using `allowOverwrite: true`. Register mocks in `setUp` — they're automatically cleared in `tearDown`.
+
+```dart
+setUp(() {
+  AirDI().clear();
+  AirDI().register<AuthService>(MockAuthService(), allowOverwrite: true);
+  AirDI().register<HttpClient>(MockHttpClient(), allowOverwrite: true);
+});
+
+test('login pulse updates isLoggedIn flow', () async {
+  final state = AuthState();
+  await state.login(email: 'a@b.com', password: '123');
+  expect(AuthFlows.isLoggedIn.value, isTrue);
+});
+```
+
+### Module Lifecycle Tests
+
+Test that a module registers its services correctly through the full lifecycle:
+
+```dart
+test('ProductsModule registers ProductService', () async {
+  AirDI().clear();
+  AirDI().register<HttpClient>(MockHttpClient());
+
+  final module = ProductsModule();
+  module.onBind(AirDI());
+  await module.onInit(AirDI());
+
+  expect(AirDI().tryGet<ProductService>(), isNotNull);
+});
+```
+
+### Test Isolation
+
+Always clear state between tests — failing to do so causes false positives from shared global state.
+
+```dart
+setUp(() => AirDI().clear());
+tearDown(() => AirDI().clear());
+```
+
+See the [Testing Guide](/guides/testing/) for the complete pattern including widget testing and adapter mocking.
+
+## Anti-Patterns
+
+Avoid these common mistakes that undermine the framework's architecture:
+
+- **Importing between modules** — use the EventBus or shared adapter contracts instead. Direct imports create hidden coupling that defeats modularity.
+- **Skipping `super` in lifecycle hooks** — always call `super.onBind(di)`, `await super.onInit(di)`, `await super.onDispose(di)` as the very first statement.
+- **Registering services outside `onBind`** — DI must be registered synchronously in `onBind`. Async setup goes in `onInit`.
+- **Calling `configureAirState()` after module registration** — it bootstraps the reactive runtime and must be the first call in `main()`.
+- **Using `any` as a version constraint** — always pin with `^major.minor.patch` for reproducible builds.
+- **Putting business logic in widgets** — keep widgets as pure rendering functions. All logic belongs in state controllers or services.

@@ -54,3 +54,46 @@ SecureServiceRegistry().setSecureData<String>(
   ttl: Duration(hours: 2),
 );
 ```
+
+## Permission Enum
+
+All available permission types in `air_framework`:
+
+| Permission | Description |
+| ---------- | ----------- |
+| `Permission.dataRead` | Read any module's shared data |
+| `Permission.dataWrite` | Write to another module's data scope |
+| `Permission.serviceCall` | Call a service registered by another module |
+| `Permission.eventEmit` | Emit events via the EventBus |
+| `Permission.eventSubscribe` | Subscribe to another module's events |
+| `Permission.uiNavigate` | Trigger navigation to routes owned by another module |
+| `Permission.configRead` | Read another module's configuration |
+| `Permission.configWrite` | Modify another module's configuration |
+
+## Permission Flow
+
+```mermaid
+sequenceDiagram
+    participant Caller as Caller Module
+    participant Checker as PermissionChecker
+    participant Registry as ModulePermissions
+
+    Caller->>Checker: check(callerModule, Permission.serviceCall, 'payments.*')
+    Checker->>Registry: lookup permissions for Caller
+    Registry-->>Checker: ScopedPermission list
+    alt Permission granted
+        Checker-->>Caller: ✅ Allowed
+    else Debug mode — violation
+        Checker-->>Caller: ⚠️ Warning logged, allowed
+    else Strict mode — violation
+        Checker-->>Caller: ❌ SecurityException thrown
+    end
+```
+
+## Security Best Practices
+
+- **Enable strict mode in production**: Call `PermissionChecker().enable()` in release builds to transform warnings into hard errors.
+- **Declare minimal permissions**: Only request the specific scopes your module needs — avoid broad wildcards like `'*'`.
+- **Use TTL for sensitive data**: Always set a `ttl` on `setSecureData` for tokens, session keys, and PII. A TTL of `Duration.zero` means the data never expires — use this only for non-sensitive static config.
+- **Prefer the EventBus over direct service calls**: Cross-module communication via events is decoupled and auditable. Direct `serviceCall` permissions tighten coupling.
+- **Audit the Permissions Inspector**: During development, review the Permissions tab in Flutter DevTools to catch unexpected cross-module access before it reaches production.

@@ -1,0 +1,201 @@
+---
+title: Testing Guide
+description: Strategies and patterns for testing Air Framework modules, state, and adapters.
+---
+
+Air Framework is designed with testability as a first-class concern. Every component — modules, state controllers, adapters, and services — can be tested in isolation thanks to the injected `AirDI` container.
+
+## 1. Setup
+
+Add the testing dependencies to your `pubspec.yaml`:
+
+```yaml
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.0
+```
+
+## 2. Testing State Controllers
+
+State controllers generated with `@GenerateState` are plain Dart classes — test them directly.
+
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:my_app/modules/counter/ui/state/counter_state.dart';
+
+void main() {
+  late CounterState state;
+
+  setUp(() {
+    state = CounterState();
+  });
+
+  test('initial count is zero', () {
+    expect(state.count, 0);
+  });
+
+  test('increment increases count by 1', () {
+    state.increment();
+    expect(state.count, 1);
+  });
+
+  test('increment is idempotent-safe (multiple calls)', () {
+    state.increment();
+    state.increment();
+    state.increment();
+    expect(state.count, 3);
+  });
+}
+```
+
+## 3. Testing Services with Mocked DI
+
+Use `AirDI().register(mock, allowOverwrite: true)` to swap real services for mocks.
+
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:air_framework/air_framework.dart';
+import 'package:my_app/modules/auth/services/auth_service.dart';
+
+class MockAuthService extends Mock implements AuthService {}
+
+void main() {
+  late MockAuthService mockAuth;
+
+  setUp(() {
+    mockAuth = MockAuthService();
+    // Override the real service with the mock
+    AirDI().register<AuthService>(mockAuth, allowOverwrite: true);
+  });
+
+  tearDown(() {
+    // Always clear DI between tests to avoid state leakage
+    AirDI().clear();
+  });
+
+  test('login calls AuthService.login with correct credentials', () async {
+    when(() => mockAuth.login(any(), any())).thenAnswer((_) async => true);
+
+    final result = await mockAuth.login('user@test.com', 'password');
+
+    verify(() => mockAuth.login('user@test.com', 'password')).called(1);
+    expect(result, isTrue);
+  });
+}
+```
+
+:::caution[Clear DI between tests]
+Always call `AirDI().clear()` in `tearDown`. Failing to do so causes services registered in one test to bleed into subsequent tests, producing flaky results.
+:::
+
+## 4. Testing Modules
+
+Test the full module registration flow using a minimal `ModuleManager` setup.
+
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:air_framework/air_framework.dart';
+import 'package:my_app/modules/counter/counter_module.dart';
+
+void main() {
+  setUp(() {
+    AirDI().clear();
+  });
+
+  test('CounterModule registers CounterState in DI', () async {
+    final manager = ModuleManager();
+    await manager.register(CounterModule());
+
+    // State should be resolvable after registration
+    expect(() => AirDI().get<CounterState>(), returnsNormally);
+  });
+}
+```
+
+## 5. Testing Adapters
+
+Adapters implement abstract contracts — test the contract, not the implementation.
+
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:air_framework/air_framework.dart';
+
+class MockHttpClient extends Mock implements HttpClient {}
+
+void main() {
+  test('HttpClient adapter returns parsed response on success', () async {
+    final mock = MockHttpClient();
+    when(() => mock.get('/products')).thenAnswer(
+      (_) async => HttpResponse(statusCode: 200, body: '[]'),
+    );
+
+    final response = await mock.get('/products');
+    expect(response.statusCode, 200);
+  });
+}
+```
+
+## 6. Widget Testing with AirView
+
+Test reactive widgets by manipulating state directly and verifying rebuilds.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:air_framework/air_framework.dart';
+import 'package:my_app/modules/counter/ui/views/counter_page.dart';
+import 'package:my_app/modules/counter/ui/state/counter_state.dart';
+
+void main() {
+  setUp(() {
+    configureAirState();
+    AirDI().register<CounterState>(CounterState(), allowOverwrite: true);
+  });
+
+  tearDown(() {
+    AirDI().clear();
+  });
+
+  testWidgets('CounterPage displays initial count of 0', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: CounterPage()),
+    );
+
+    expect(find.text('Count: 0'), findsOneWidget);
+  });
+
+  testWidgets('tapping FAB increments count', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: CounterPage()),
+    );
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump(); // trigger rebuild
+
+    expect(find.text('Count: 1'), findsOneWidget);
+  });
+}
+```
+
+## 7. Recommended Test Structure
+
+Organize tests to mirror your module structure:
+
+```text
+test/
+├── modules/
+│   ├── counter/
+│   │   ├── counter_module_test.dart    ← module registration
+│   │   ├── counter_state_test.dart     ← unit: state controller
+│   │   └── counter_page_test.dart      ← widget: UI
+│   └── auth/
+│       ├── auth_module_test.dart
+│       └── auth_service_test.dart
+└── adapters/
+    └── http_client_test.dart           ← adapter contract
+```
+
+> **Rule of thumb**: One test file per class. State controllers and services → unit tests. Pages → widget tests. Modules → integration tests.

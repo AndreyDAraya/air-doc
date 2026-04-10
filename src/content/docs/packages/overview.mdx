@@ -1,32 +1,59 @@
 ---
 title: Packages Overview
-description: The ecosystem of Air Framework.
+description: The ecosystem of Air Framework — packages, versions, and dependency matrix.
 ---
 
-The Air Framework is composed of several independent but integrated packages.
+The Air Framework is composed of several independent but integrated packages. Each package can be used standalone or as part of the full ecosystem.
+
+## Package Versions
+
+| Package | Current Version | Pub.dev |
+| ------- | :-------------: | ------- |
+| **air_framework** | `1.0.4` | [pub.dev/packages/air_framework](https://pub.dev/packages/air_framework) |
+| **air_state** | `1.0.4` | [pub.dev/packages/air_state](https://pub.dev/packages/air_state) |
+| **air_generator** | `1.0.2` | [pub.dev/packages/air_generator](https://pub.dev/packages/air_generator) |
+| **air_cli** | `1.0.9` | [pub.dev/packages/air_cli](https://pub.dev/packages/air_cli) |
+
+## Dependency Matrix
+
+| Package | Depends on | Required By |
+| ------- | ---------- | ----------- |
+| **air_framework** | `air_state ^1.0.4`, `go_router ^14.0.0` | Your app |
+| **air_state** | `dart:async` (stdlib only) | `air_framework`, your app |
+| **air_generator** | `build ^2.4.0`, `source_gen ^1.5.0` | dev only |
+| **air_cli** | Dart SDK, `pubspec_parse` | global tool |
 
 ## Core Framework
 
 ### [air_framework](https://pub.dev/packages/air_framework)
 
-The main package that orchestrates modularity, dependency injection, routing, and security.
+The main orchestrator. Manages module lifecycle, dependency injection (`AirDI`), distributed routing (`AirRouter`), the EventBus, adapter registry, and the security permission system.
 
-## State Management
+**Use it when**: You want the full framework — modules, DI, routing, security.
 
 ### [air_state](https://pub.dev/packages/air_state)
 
-The reactive engine. Lightweight, fast, and key-based. It can be used standalone or as part of the full framework.
+The reactive engine. Lightweight key-based state management with `StateFlow`, `AirView`, and `AirBuilder`. **No Flutter dependency** — runs in pure Dart environments.
+
+**Standalone usage**: You can use `air_state` in any Dart or Flutter project without the full `air_framework`.
+
+```yaml
+dependencies:
+  air_state: ^1.0.4 # standalone reactive state — no framework required
+```
 
 ### [air_generator](https://pub.dev/packages/air_generator)
 
-The build runner annotation processor. It powers the `@GenerateState` pattern and creates the `Flows` and `Pulses` plumbing.
+The build runner annotation processor. Reads `@GenerateState` annotations and generates `*.air.g.dart` files with `Flows` (data) and `Pulses` (actions).
+
+**Only in `dev_dependencies`** — has zero runtime impact.
 
 ## Tooling
 
 ### [air_cli](https://pub.dev/packages/air_cli)
 
-The command-line interface for scaffolding, automation, and project management.
+The command-line interface for scaffolding, automation, AI skill installation, and project management. Activated globally via `dart pub global activate air_cli`.
 
 ---
 
-> **Note**: All packages follow semantic versioning and are strictly maintained for compatibility.
+> **Compatibility**: All packages follow semantic versioning (`^major.minor.patch`). Minor and patch releases are backwards-compatible. Major releases include a migration guide.

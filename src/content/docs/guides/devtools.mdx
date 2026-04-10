@@ -1,0 +1,86 @@
+---
+title: DevTools & Inspector
+description: Debugging Air Framework apps with the built-in in-app debug inspector.
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+Air Framework ships a **built-in in-app debug inspector** — a floating overlay that sits on top of your app during development. It is **not** a Flutter DevTools extension; it lives directly inside your app as a draggable panel.
+
+## Setting Up the Inspector
+
+Wrap your `MaterialApp.router` builder with `DebugOverlay`:
+
+```dart
+import 'package:air_framework/air_framework.dart';
+
+MaterialApp.router(
+  routerConfig: AirRouter().router,
+  builder: (context, child) {
+    // Wrap with DebugOverlay to enable the in-app inspector
+    return DebugOverlay(child: child!);
+  },
+)
+```
+
+The `DebugOverlay` widget adds a floating `⚡` button (bolt icon, cyan) to your app — visible only in debug builds by default. Tap it to open the panel.
+
+:::tip[Where is the button?]
+By default, the `⚡` button appears in the **bottom-right corner** of the screen (`width - 80, height - 80`). It is fully draggable, so if you can't see it, it may be hidden behind another element — try scrolling or looking under safe area insets. An extra red dot appears on the icon if your FPS drops below 50.
+:::
+
+## Inspector Tabs
+
+Once opened, the panel shows 8 tabs:
+
+<Tabs>
+  <TabItem label="GRAPH">
+    **AirGraphTab** — Visual dependency graph of all registered modules and their inter-module relationships.
+
+    See which modules depend on which at a glance. Useful for detecting unexpected coupling.
+  </TabItem>
+  <TabItem label="MODULES">
+    **ModulesTab** — Lists every module registered with `ModuleManager` and its current registration status.
+
+    Shows module IDs, declared dependencies, and their lifecycle state.
+  </TabItem>
+  <TabItem label="ADAPTERS">
+    **AdaptersTab** — Shows all adapters registered in `AirDI` and what contracts they fulfill.
+  </TabItem>
+  <TabItem label="STATE">
+    **StateTab** — Live view of all active `StateFlow` values.
+
+    Values update in real time as they change. Useful for debugging stale state or unexpected reactive updates.
+  </TabItem>
+  <TabItem label="PULSES">
+    **PulsesTab** — Shows all registered `AirPulse` objects and lets you monitor when they fire.
+  </TabItem>
+  <TabItem label="DI">
+    **DITab** — Lists every service registered in `AirDI` and its lifecycle type (`LazySingleton`, `Factory`, etc.).
+  </TabItem>
+  <TabItem label="PERF">
+    **PerformanceTab** — Real-time FPS monitor with frame time history (last 60 frames).
+
+    The FPS is also visible in the **header** of the inspector panel (`v1.0.0 • 60 FPS`). If FPS drops below 50, the floating `⚡` button shows a red dot as an alert.
+  </TabItem>
+  <TabItem label="LOGS">
+    **LogsTab** — Framework log stream (module registration, lifecycle events, DI lookups, errors).
+  </TabItem>
+</Tabs>
+
+## Disabling in Production
+
+`DebugOverlay` accepts an `enabled` flag. Pass `false` to remove it entirely from release builds:
+
+```dart
+builder: (context, child) {
+  return DebugOverlay(
+    enabled: kDebugMode, // only shown in debug mode
+    child: child!,
+  );
+},
+```
+
+## Relationship with Flutter DevTools
+
+The Air inspector is **independent** from Flutter DevTools. You don't need to open DevTools to use it — everything is accessible directly on the device/simulator screen. Flutter DevTools still works normally alongside it (Widget Inspector, Timeline, Memory, etc.).

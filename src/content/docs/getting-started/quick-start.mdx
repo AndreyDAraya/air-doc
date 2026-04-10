@@ -42,6 +42,7 @@ class CounterModule extends AppModule {
 
   @override
   void onBind(AirDI di) {
+    super.onBind(di); // ⚠️ Always call super first
     di.registerLazySingleton<CounterState>(() => CounterState());
   }
 }
@@ -71,10 +72,14 @@ class CounterState extends _CounterState {
   // Public methods become dispatchable Pulses
   @override
   void increment() {
-    count++; // Direct field access is tracked!
+    count++; // Direct field access is tracked by the generated _CounterState!
   }
 }
 ```
+
+:::note[Why does `count++` work?]
+`@GenerateState` generates a `_CounterState` base class with a public `count` setter. When you write `count++`, you're calling that setter — which internally updates `CounterFlows.count` and triggers reactive rebuilds in any `AirView` observing it. No `setState()`, no `emit()`, no `notifyListeners()` required.
+:::
 
 ## 4. Run Code Generation
 
@@ -126,7 +131,7 @@ Register your module in `main.dart`.
 ```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  configureAirState();
+  configureAirState(); // ← Required: initializes the Air reactive runtime
 
   await ModuleManager().register(CounterModule());
 
@@ -135,3 +140,6 @@ void main() async {
   ));
 }
 ```
+
+> [!TIP]
+> `configureAirState()` must be called before any module is registered. It bootstraps the reactive dependency tracking system. Omitting it will cause `StateFlow` updates to be silently ignored.

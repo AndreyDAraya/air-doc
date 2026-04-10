@@ -68,9 +68,18 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Guides',
+					items: [
+						{ label: 'Why Air Framework?', slug: 'guides/why-air-framework' },
+						{ label: 'Testing Guide', slug: 'guides/testing' },
+						{ label: 'DevTools & Inspector', slug: 'guides/devtools' },
+						{ label: 'Community Modules', slug: 'guides/community-modules' },
+						{ label: 'Best Practices', slug: 'guides/best-practices' },
+					],
+				},
+				{
 					label: 'Reference',
 					items: [
-						{ label: 'Best Practices', slug: 'guides/best-practices' },
 						{ label: 'Packages Overview', slug: 'packages/overview' },
 					],
 				},

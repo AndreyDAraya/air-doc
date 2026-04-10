@@ -3,7 +3,7 @@ title: Air Framework
 description: Build industrial-grade, modular, and reactive Flutter applications with ease.
 template: splash
 hero:
-  tagline: Decentralize your development. A modular, reactive framework that decouples logic and scales with your teams.
+  tagline: Build industrial-grade Flutter apps — modular, reactive, and AI-ready. Stop fighting spaghetti code and start shipping features that scale.
   image:
     file: ../../assets/air-aero.svg
   actions:
@@ -20,7 +20,9 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 
 ## Why Air Framework?
 
-In large-scale development, modularity isn't just a feature—it's a necessity. Air Framework is designed to solve the complexity of growing applications by enforcing **strict module boundaries**, **unidirectional data flow**, and **explicit dependencies**.
+Your app starts clean. Then the team grows, features multiply, and suddenly every change breaks something else. State leaks between screens. Three developers edited the same file last week. Onboarding a new engineer takes days just to understand where things live.
+
+Air Framework solves this by treating each feature as a fully isolated **module** — with its own lifecycle, DI scope, routes, and reactive state — orchestrated by a lightweight core that enforces strict boundaries and explicit dependencies.
 
 ### The Power of Being Modular
 
@@ -30,28 +32,29 @@ In large-scale development, modularity isn't just a feature—it's a necessity. 
 
 <CardGrid>
   <Card title="Team-Centric Modularity" icon="puzzle">
-    Build and maintain modules in isolation. Perfect for multi-team
-    environments and independent Git repository management.
-  </Card>
-  <Card title="Adapters" icon="setting">
-    Headless service integrations (HTTP, analytics, error tracking) with
-    abstract contracts for clean module decoupling.
+    Build and maintain modules in isolation. Each feature is a self-contained
+    unit — perfect for multi-team environments and independent Git repositories.
   </Card>
   <Card title="Reactive State" icon="rocket">
-    Powered by `air_state` with code generation for zero-boilerplate,
-    high-performance reactivity.
+    Powered by `air_state` with `@GenerateState` code generation. Zero
+    boilerplate, fine-grained rebuilds, and a clean Pulse → State → Flow → UI
+    data flow.
+  </Card>
+  <Card title="Adapters" icon="setting">
+    Headless service integrations (HTTP, analytics, error tracking) behind
+    abstract contracts. Swap implementations without touching a single module.
   </Card>
   <Card title="Dependency Injection" icon="random">
-    Type-safe DI with scoped services, module ownership, and lifecycle
-    management.
+    Type-safe, scoped DI with explicit module ownership and full lifecycle
+    management via `onBind` and `onInit`.
   </Card>
-  <Card title="Secure by Design" icon="pkl">
-    Opt-in permission system, secure service registry, and audit trails for
-    enterprise needs.
+  <Card title="Secure by Design" icon="shield">
+    Opt-in permission system, secure service registry with caller restrictions,
+    and TTL-based shared data for enterprise needs.
   </Card>
   <Card title="AI Agent Skills" icon="star">
-    Install framework knowledge for AI coding agents — they automatically
-    understand Air's architecture and conventions.
+    Run `air skills install` to give your AI coding agent instant framework
+    knowledge — correct modules and state generated on the first prompt.
   </Card>
 </CardGrid>
 
