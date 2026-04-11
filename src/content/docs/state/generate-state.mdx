@@ -64,9 +64,9 @@ class NotificationIcon extends StatelessWidget {
   }
 }
 
-// Triggering an action
+// Triggering an action (callable shorthand)
 void onRefresh() {
-  NotificationsPulses.markAsRead.pulse(null);
+  NotificationsPulses.markAsRead(null);
 }
 ```
 

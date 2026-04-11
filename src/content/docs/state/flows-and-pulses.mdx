@@ -29,9 +29,28 @@ A **Pulse** is an event or action that triggers a change in the state. It is how
 - **Decoupled**: Triggering a pulse doesn't require knowing _how_ the state will change, only _what_ action is being requested.
 
 ```dart
-// Triggering a Pulse
-onPressed: () => CounterPulses.increment.pulse(null),
+// Triggering a Pulse (shorthand — callable syntax)
+onPressed: () => CounterPulses.increment(null),
 ```
+
+### Callable Shorthand
+
+`AirPulse` is a **callable class**. You can invoke it directly like a function — no need to call `.pulse()` explicitly:
+
+```dart
+// ✅ Shorthand (recommended)
+CounterPulses.increment(null);
+AuthPulses.login((email: email, password: password));
+
+// ✅ Explicit form (also valid)
+CounterPulses.increment.pulse(null);
+```
+
+Both forms are equivalent. The shorthand avoids the semantic redundancy of `Pulses.x.pulse()` while keeping the API expressive and clean.
+
+:::tip
+The explicit `.pulse()` method is still available for readability in complex expressions or when you want to emphasize that a signal is being emitted.
+:::
 
 ---
 
