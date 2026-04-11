@@ -47,6 +47,7 @@ export default defineConfig({
 						{ label: 'Code Generation', slug: 'state/generate-state' },
 						{ label: 'Flows & Pulses', slug: 'state/flows-and-pulses' },
 						{ label: 'AirView', slug: 'state/air-view' },
+						{ label: 'AirListener', slug: 'state/air-listener' },
 					],
 				},
 				{

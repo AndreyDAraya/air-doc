@@ -1,0 +1,76 @@
+---
+title: AirListener
+description: Handle side-effects reactively without rebuilding the UI.
+---
+
+`AirListener` is a widget designed to execute side-effects (like navigation, showing SnackBars, or opening dialogs) in response to state changes, **without rebuilding your UI**.
+
+## Why use AirListener?
+
+In Flutter, the `build` method should be pure and focused only on drawing the interface. Mixing side-effects inside builders like `AirView` using `addPostFrameCallback` is an anti-pattern that can lead to duplicated dialogs or unexpected routing when the widget rebuilds for other reasons.
+
+`AirListener` strictly observes state dependencies and triggers a callback when any of them change, keeping your `build` methods pristine.
+
+## Basic Usage
+
+Wrap your UI or the specific section that needs side-effects with an `AirListener`. Provide a list of `AirStateKey`s to `listen` to, and define your side-effects inside the `listener` callback.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:air_framework/air_framework.dart';
+
+class LoginPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AirListener(
+      listen: [
+        AuthFlows.isAuthenticated, 
+        AuthFlows.error
+      ],
+      listener: (context) {
+        // 1. Reacting to authentication success
+        if (AuthFlows.isAuthenticated.value) {
+          context.go('/');
+        }
+
+        // 2. Reacting to errors
+        if (AuthFlows.error.value != null && AuthFlows.error.value!.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AuthFlows.error.value!)),
+          );
+          // Optional: Clear the error after showing it
+          AuthPulses.clearMessages.pulse(null); 
+        }
+      },
+      child: Scaffold(
+        body: Center(
+          child: AirView((context) {
+            return ElevatedButton(
+              onPressed: () => AuthPulses.login.pulse(credentials),
+              child: Text('Sign In'),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+```
+
+## How It Works
+
+1. **Subscription**: In `initState`, `AirListener` subscribes to the underlying `AirController`s associated with the keys provided in the `listen` list.
+2. **Execution**: When any observed state changes, the `listener` callback is invoked safely.
+3. **No Rebuilds**: The `child` widget is not rebuilt when state changes occur. It only rebuilds according to the standard Flutter widget lifecycle or if wrapped in an `AirView`. 
+
+## Comparison
+
+| Widget | Purpose | Rebuilds UI? |
+| :--- | :--- | :--- |
+| **`AirView`** | To re-draw the UI based on state changes. | Yes |
+| **`AirListener`** | To execute one-off side-effects when state changes. | No |
+
+## Best Practices
+
+- **Use for Side-effects Only**: Never use `setState` inside the `listener` to update the widget's internal UI state. If you need UI updates based on global state, use `AirView`.
+- **Top-level Placement**: Place `AirListener` high enough in the widget tree so it encompasses the scope where the side-effect (like a Navigator or ScaffoldMessenger `context`) remains valid.
